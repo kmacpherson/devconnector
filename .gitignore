@@ -62,3 +62,6 @@ typings/
 
 #config directory with proprietary information
 config/
+
+# package lock file
+package-lock.json
