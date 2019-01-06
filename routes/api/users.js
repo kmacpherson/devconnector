@@ -10,6 +10,10 @@ const passport = require('passport');
 // Load user module
 const User = require('../../models/User');
 
+// Validate Input
+const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
+
 
 // @route   GET api/users/test
 // @desc    Tests user route
@@ -20,10 +24,20 @@ router.get('/test', (req,res) => res.json({msg: 'Users works'}));
 // @desc    Register user
 // @access  Public
 router.post('/register', (req, res) => {
+
+    // Check validation
+    const { errors, isValid } = validateRegisterInput(req.body);
+
+    // If not valid return error.
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
+
     User.findOne({ email: req.body.email })
     .then(user => {
         if(user) {
-            return res.status(400).json({email: 'Email already exists'});
+            errors.email = 'E-Mail already exists.';
+            return res.status(400).json(errors);
         } else {
             const avatar = gravatar.url(req.body.email, {
                 s: '200', //Size
@@ -54,8 +68,13 @@ router.post('/register', (req, res) => {
 // @desc    Login User / Returning JWT Token
 // @access  public
 router.post('/login', (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+      // Check validation
+      const { errors, isValid } = validateLoginInput(req.body);
+
+      // If not valid return error.
+      if (!isValid) {
+          return res.status(400).json(errors);
+      }
 
     // find the user by email.
     User.findOne({email})
